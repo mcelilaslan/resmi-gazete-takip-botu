@@ -1,51 +1,59 @@
 # 📰 Resmi Gazete Anahtar Kelime Takip Botu
 
-Bu Google Apps Script projesi, her sabah **T.C. Resmi Gazete** web sitesini (resmigazete.gov.tr) tarar ve belirlediğiniz anahtar kelimeleri (örneğin: *sağlık, doktor, yönetmelik*) içeren bir madde yayınlandığında size otomatik olarak **e-posta** gönderir.
+Bu proje her sabah **T.C. Resmi Gazete** web sitesini (resmigazete.gov.tr) tarar, belirlenen anahtar kelimeleri içeren maddeleri bulur, Gemini API ile kısa bir özet çıkarır ve e-posta ile bildirir.
+
+> **Not:** Proje ilk sürümünde Google Apps Script üzerinde çalışıyordu (bkz. `legacy/code.gs`). resmigazete.gov.tr, Google sunucularının IP aralıklarından gelen istekleri engellemeye başladığından, proje **kendi sunucunuzda (self-hosted) Docker ile çalışan bir Python servisine** taşındı.
 
 ## 🚀 Özellikler
 
-* **Akıllı Proxy Kullanımı:** Resmi Gazete'nin güvenlik duvarlarını ve IP kısıtlamalarını aşmak için Proxy altyapısı kullanır.
-* **Karakter Seti Düzeltme:** Sitenin eski kodlamasından (Windows-1254) kaynaklanan Türkçe karakter sorunlarını (ş, ğ, ı vb.) otomatik düzeltir.
-* **Tam Otomatik:** Google sunucularında çalışır, bilgisayarınızın açık olmasına gerek yoktur.
-* **Doğrudan Linkleme:** E-postada gelen başlıklara tıkladığınızda direkt ilgili yönetmeliğe/karara gidersiniz.
+- Anahtar kelime bazlı filtreleme (hastane, sağlık, doktor, yoğun bakım vb.)
+- Gemini ile branşa özel (anestezi/reanimasyon odaklı) otomatik özet
+- Türkçe karakter/encoding (Windows-1254) düzeltmesi
+- Docker ile kendi sunucunuzda 7/24 çalışır, harici bir servise bağımlı değildir
+- Her gün saat 08:00'da otomatik tarama + container başlangıcında bir kerelik test taraması
 
-## 🛠️ Kurulum
+## 🛠️ Kurulum (Docker ile self-hosted)
 
-Bu botu kullanmak için herhangi bir yazılım indirmene gerek yok. Sadece bir Google hesabına ihtiyacın var.
+1. **Repoyu klonla:**
+```bash
+   git clone https://github.com/mcelilaslan/resmi-gazete-takip-botu.git
+   cd resmi-gazete-takip-botu
+```
 
-1.  **Google Apps Script'e Git:**
-    * [script.google.com](https://script.google.com/) adresine git.
-    * Sol üstten **"Yeni Proje"** (New Project) butonuna tıkla.
+2. **.env dosyasını oluştur:**
+```bash
+   cp .env.example .env
+   nano .env
+```
+   İçine kendi Gemini API key'ini ve Gmail bilgilerini yaz:
 
-2.  **Kodu Yapıştır:**
-    * Açılan editördeki varsayılan kodları sil.
-    * Bu repodaki `code.gs` dosyasının içeriğini kopyala ve editöre yapıştır.
-    * Projeye bir isim ver (Örn: *Resmi Gazete Botu*).
+GEMINI_API_KEY=...
+GMAIL_USER=...
+GMAIL_APP_PASSWORD=...
 
-3.  **Kelimeleri Düzenle:**
-    * Kodun başındaki `keywords` listesini kendine göre düzenle:
-    ```javascript
-    const keywords = ["hastane", "sağlık", "ihale", "enerji"];
-    ```
+   Gmail için normal şifreniz değil, [Uygulama Şifresi](https://myaccount.google.com/apppasswords) kullanmanız gerekir.
 
-4.  **Test Et:**
-    * Editörde **"Çalıştır"** (Run) butonuna bas.
-    * İlk seferde Google senden "İzin" isteyecektir. İzinleri ver (Gelişmiş -> Güvenli Değil Git diyerek onayla).
+3. **Anahtar kelimeleri düzenle (opsiyonel):**
+   `main.py` içindeki `KEYWORDS` listesini kendine göre değiştir.
 
-5.  **Otomatikleştir (Zamanlayıcı Kur):**
-    * Sol menüden **Saat Simgesine** (Tetikleyiciler / Triggers) tıkla.
-    * **Tetikleyici Ekle** butonuna bas.
-    * **Etkinlik Kaynağı:** `Zaman Odaklı`
-    * **Tetikleyici Türü:** `Gün Zamanlayıcısı`
-    * **Saat:** `07:00 ile 08:00` arasını seç.
-    * **Kaydet** de.
+4. **Başlat:**
+```bash
+   docker compose up -d --build
+```
 
-Artık script her sabah Resmi Gazete'yi senin için okuyacak! ☕
+5. **Logları izle:**
+```bash
+   docker compose logs -f
+```
+
+## ⚠️ Güvenlik Notu
+
+`.env` dosyanızı **asla** git'e eklemeyin — `.gitignore` bunu zaten engelliyor. API key'lerinizi kod içine hardcode etmeyin.
 
 ## ⚠️ Yasal Uyarı
 
-Bu script açık kaynaklı bir eğitim projesidir. **resmigazete.gov.tr** ile resmi bir bağlantısı yoktur. Site yapısında (HTML DOM) yapılacak değişiklikler botun çalışmasını durdurabilir. Sorumluluk kullanıcıya aittir.
+Bu proje açık kaynaklı bir kişisel/eğitim projesidir. **resmigazete.gov.tr** ile resmi bir bağlantısı yoktur. Site yapısında yapılacak değişiklikler botun çalışmasını durdurabilir. Sorumluluk kullanıcıya aittir.
 
 ## 📄 Lisans
 
-Bu proje [MIT Lisansı](LICENSE) ile lisanslanmıştır.
+Bu proje [MIT Lisansı](LICENSE.txt) ile lisanslanmıştır.
