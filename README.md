@@ -2,7 +2,7 @@
 
 Bu proje her sabah **T.C. Resmi Gazete** web sitesini (resmigazete.gov.tr) tarar, belirlenen anahtar kelimeleri içeren maddeleri bulur, Gemini API ile kısa bir özet çıkarır ve e-posta ile bildirir.
 
-> **Not:** Proje ilk sürümünde Google Apps Script üzerinde çalışıyordu (bkz. `legacy/code.gs`). resmigazete.gov.tr, Google sunucularının IP aralıklarından gelen istekleri engellemeye başladığından, proje **kendi sunucunuzda (self-hosted) Docker ile çalışan bir Python servisine** taşındı.
+> **Not:** Proje ilk sürümünde Google Apps Script üzerinde çalışıyordu (resmigazete.gov.tr, Google sunucularının IP aralıklarından gelen istekleri engellemeye başladığından, proje **kendi sunucunuzda (self-hosted) Docker ile çalışan bir Python servisine** taşındı.
 
 ## 🚀 Özellikler
 
